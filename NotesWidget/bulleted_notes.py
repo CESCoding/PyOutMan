@@ -16,8 +16,6 @@ class BulletedNotes(ttk.Treeview):
         self.bind("<Shift-KeyPress-Down>", lambda e: self.move_note(e, "down"))
         self.bind("<Shift-Left>", lambda e: self.move_note(e, "left"))
         self.bind("<Shift-Right>", lambda e: self.move_note(e, "right"))
-        self.bind("<Up>", self.fix_up_bug)
-        self.bind("<Down>", self.fix_down_bug)
         self.bind("<Delete>", self.note_delete)
 
     def b_down_shift(self, event):
@@ -57,12 +55,12 @@ class BulletedNotes(ttk.Treeview):
             for item in selected:
                 index = tv.index(item)
                 tv.move(item, tv.parent(tv.prev(item)), index-1)
-            tv.focus(tv.next(focused))
+            #tv.focus(tv.next(focused))
         elif d.lower() == "down":
             for item in selected:
                 index = tv.index(item)
                 tv.move(item, tv.parent(tv.next(item)), last_selected_index+1)
-            tv.focus(tv.prev(focused))
+            #tv.focus(tv.prev(focused))
         elif d.lower() == "left":
             for item in selected:
                 index = tv.index(tv.parent(item)) + 1
@@ -73,38 +71,10 @@ class BulletedNotes(ttk.Treeview):
                 index = tv.index(item)
                 if tv.prev(item) is not '':
                     tv.move(item, tv.prev(item), index)
-        selected = tv.selection()
-        tv.focus(focused)
-        tv.selection_set(*selected)
+        #selected = tv.selection()
+        tv.after_idle(lambda: tv.selection_set(selected))
+        tv.after_idle(lambda: tv.focus(focused))
         return None
-
-    def fix_up_bug(self, event):
-        tv = event.widget
-        s = event.state
-        shift = (s & 0x1) != 0
-        if shift:
-            selected = tv.selection()
-            print(selected)
-            tv.selection_set(*selected)
-            return None
-        else:
-            pass
-            # tv = event.widget
-            # tv.focus(tv.prev(tv.focus()))
-
-    def fix_down_bug(self, event):
-        tv = event.widget
-        s = event.state
-        shift = (s & 0x1) != 0
-        if shift:
-            selected = tv.selection()
-            print(selected)
-            tv.selection_set(*selected)
-            return None
-        else:
-            pass
-            # tv = event.widget
-            # tv.focus(tv.next(tv.focus()))
 
     def note_delete(self, event):
         tv = event.widget
@@ -116,3 +86,12 @@ class BulletedNotes(ttk.Treeview):
                     tv.delete(item)
                 except tk.TclError as err:
                     pass
+# TODO: Figure out way to link an entry box and text in a treeview item. Maybe need to subclass stringvar?
+# TODO: Make double-click on item in Treeview spawn an Entry over the item and update the item text from the Entry
+# TODO: Bind Enter to Create New Child
+# TODO: Right click menu
+# TODO: Top Menu Bar? Best done in outer window
+#        view options: Expand/collapse all, search, themes?
+# TODO: Save/Load or it's all useless
+# TODO: Potentially create a overload of the insert function to allow inserting direct from entry?
+#       would need to associate text to both stringvar and item
